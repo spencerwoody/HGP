@@ -3,7 +3,9 @@ title: "Hierarchical Gaussian process regression with application to microarray 
 author: "Spencer Woody"
 date: "July 1, 2017"
 output: 
-    html_document
+    html_document:
+        theme: cosmo
+        highlight: textmate
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +13,7 @@ library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE, fig.path = "img/")
 ```
 
-## R Markdown
+## Introduction
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. Here's some math: $$ \sum_{i=1}^N X_i $$ And now some inline math: $\epsilon_i  \sim_{\text{iid}} \mathcal{N}(0, 1)$.
  
@@ -22,20 +24,40 @@ $$ 	\begin{aligned} h_i(t) &\sim \text{GP}(\mathbf{0}, k_h(t, t')) \\
 	f_{nr}(t) &\sim \text{GP}(g_n(t), k_f(t, t')) \end{aligned} $$
 
 
-```{r cars}
-summary(diamonds)
+```{r start}
+# Resave the data with new format
+drosophila <- read.csv("droslong.csv", header = T)
+head(drosophila)
+
+# Simpler dataframe
+fruitfly <- data.frame(
+	group = drosophila$group, 
+	gene = drosophila$gene,
+	replicate = drosophila$replicate, 
+	time = drosophila$time,
+	log2exp = drosophila$log2exp)
+	
+# Order the dataframe
+fruitfly <- fruitfly[with(fruitfly, order(group, gene, replicate, time)), ]
+head(fruitfly)
 ```
 
 ## Including Plots
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-ggplot(diamonds, aes(carat, price)) +
-    geom_point(aes(col = cut)) + 
-    facet_wrap(~clarity) + 
-    scale_color_brewer(palette = "Set1")
+```{r plot-all-genes}
+allgenes <- ggplot(drosophila, aes(time, log2exp)) +
+    geom_point(aes(col = replicate)) +
+    facet_wrap(~gene) +
+    ggtitle("Expression Profiles for all Genes") +
+    xlab("Time") +
+    ylab("log2-Normalized gene expression") + 
+    scale_colour_brewer(palette="Set1") +
+    scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+allgenes
 ```
 
 ```{r, echo = F, eval = F}
