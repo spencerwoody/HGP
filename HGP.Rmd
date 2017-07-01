@@ -1,0 +1,47 @@
+---
+title: "Hierarchical Gaussian process regression with application to microarray data"
+author: "Spencer Woody"
+date: "July 1, 2017"
+output: 
+    html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE, fig.path = "img/")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. Here's some math: $$ \sum_{i=1}^N X_i $$ And now some inline math: $\epsilon_i  \sim_{\text{iid}} \mathcal{N}(0, 1)$.
+ 
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+$$ 	\begin{aligned} h_i(t) &\sim \text{GP}(\mathbf{0}, k_h(t, t')) \\
+	g_n(t) &\sim \text{GP}(h_i(t), k_g(t, t')) \text{ for } n\in c_i \\
+	f_{nr}(t) &\sim \text{GP}(g_n(t), k_f(t, t')) \end{aligned} $$
+
+
+```{r cars}
+summary(diamonds)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+ggplot(diamonds, aes(carat, price)) +
+    geom_point(aes(col = cut)) + 
+    facet_wrap(~clarity) + 
+    scale_color_brewer(palette = "Set1")
+```
+
+```{r, echo = F, eval = F}
+# Run this at the end to make a copy of the html output as index.html
+system("cp HGP.html index.html")
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
