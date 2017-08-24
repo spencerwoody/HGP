@@ -1,7 +1,7 @@
 ---
 title: "Hierarchical Gaussian process regression with application to microarray data"
 author: "Spencer Woody"
-date: "July 1, 2017"
+date: "August 26, 2017"
 output: 
     html_document:
         theme: cosmo
@@ -9,55 +9,85 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE, fig.path = "img/")
 ```
 
 ## Introduction
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. Here's some math: $$ \sum_{i=1}^N X_i $$ And now some inline math: $\epsilon_i  \sim_{\text{iid}} \mathcal{N}(0, 1)$.
- 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Based on a paper by [Hensman, Lawrence, and Rattray](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-252), we model gene expression levels as a hierarchical Gaussian process,
 
 $$ 	\begin{aligned} h_i(t) &\sim \text{GP}(\mathbf{0}, k_h(t, t')) \\
 	g_n(t) &\sim \text{GP}(h_i(t), k_g(t, t')) \text{ for } n\in c_i \\
-	f_{nr}(t) &\sim \text{GP}(g_n(t), k_f(t, t')) \end{aligned} $$
+	f_{nr}(t) &\sim \text{GP}(g_n(t), k_f(t, t')). \end{aligned}  $$
 
 
-```{r start}
-# Resave the data with new format
-drosophila <- read.csv("droslong.csv", header = T)
+```{r start, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(RColorBrewer)
+theme_set(theme_bw(base_size = 12)) # Slightly larger text for ggplot2
+
+# Read in data, rearrange columns & rows, change levels order in gene factor
+drosophila <- read_csv("droslong.csv") %>%
+    select(group, gene, replicate, time, log2exp) %>% 
+    arrange(group, gene, replicate, time) %>% 
+    mutate(gene = fct_inorder(gene))
+
 head(drosophila)
-
-# Simpler dataframe
-fruitfly <- data.frame(
-	group = drosophila$group, 
-	gene = drosophila$gene,
-	replicate = drosophila$replicate, 
-	time = drosophila$time,
-	log2exp = drosophila$log2exp)
-	
-# Order the dataframe
-fruitfly <- fruitfly[with(fruitfly, order(group, gene, replicate, time)), ]
-head(fruitfly)
 ```
+
 
 ## Including Plots
 
 You can also embed plots, for example:
 
 ```{r plot-all-genes}
-allgenes <- ggplot(drosophila, aes(time, log2exp)) +
-    geom_point(aes(col = replicate)) +
+allgenes <- drosophila %>% 
+    ggplot(aes(time, log2exp)) +
+    geom_point(aes(col = group, alpha = replicate)) +
     facet_wrap(~gene) +
-    ggtitle("Expression Profiles for all Genes") +
-    xlab("Time") +
-    ylab("log2-Normalized gene expression") + 
-    scale_colour_brewer(palette="Set1") +
-    scale_x_continuous(breaks = seq(0, 12, by = 2)) +
-    theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5))
+    labs(title = "Expression Profiles for all Genes",
+         x = "Time",
+         y = "log2-Normalized gene expression") + 
+    scale_colour_brewer(palette = "Dark2") +
+    scale_x_continuous(breaks = seq(0, 12, by = 2)) 
 allgenes
+
+group1plot <- drosophila %>% 
+    filter(group == "group1") %>% 
+    ggplot(aes(time, log2exp)) +
+    geom_point(aes(col = gene)) +
+    facet_wrap(~gene) +
+    labs(title = "Expression Profiles for all Genes",
+         x = "Time",
+         y = "log2-Normalized gene expression") + 
+    scale_colour_brewer(palette = "Set1") +
+    scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    scale_y_continuous(limits = c(min(drosophila$log2exp),
+                                  max(drosophila$log2exp)))
+
+group2plot <- drosophila %>% 
+    filter(group == "group2") %>% 
+    ggplot(aes(time, log2exp)) +
+    geom_point(aes(col = gene)) +
+    facet_wrap(~gene) +
+    labs(title = "Expression Profiles for all Genes",
+         x = "Time",
+         y = "log2-Normalized gene expression") + 
+    scale_colour_brewer(palette = "Set1") +
+    scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+    scale_y_continuous(limits = c(min(drosophila$log2exp),
+                                  max(drosophila$log2exp)))
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Appendix: R session information
+
+```{r}
+sessionInfo()
 ```
 
 ```{r, echo = F, eval = F}
@@ -66,4 +96,3 @@ system("cp HGP.html index.html")
 ```
 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
