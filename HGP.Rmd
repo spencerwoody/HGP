@@ -30,6 +30,8 @@ Suppose we have $\mathbf{h}_i$, $\mathbf{g}_n$, and $\mathbf{f}_{nr}$, which are
 
 ## Implementation in R
 
+First we will library in the required packages and read in the data in the format we want, which reflects the hierarchical nature of the data. 
+
 ```{r start, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(RColorBrewer)
@@ -44,12 +46,11 @@ drosophila <- read_csv("droslong.csv") %>%
 head(drosophila)
 ```
 
-
-## Including Plots
+### Plotting the data
 
 You can also embed plots, for example:
 
-```{r plot-all-genes}
+```{r plot-all-genes, fig.width=7, fig.height=6}
 allgenes <- drosophila %>% 
     ggplot(aes(time, log2exp)) +
     geom_point(aes(col = group, alpha = replicate)) +
