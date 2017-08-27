@@ -4,7 +4,7 @@ author: "Spencer Woody"
 date: "August 26, 2017"
 output: 
     html_document:
-        theme: cosmo
+        theme: readable
         highlight: textmate
 ---
 
@@ -18,13 +18,22 @@ Based on a paper by [Hensman, Lawrence, and Rattray](https://bmcbioinformatics.b
 
 $$ 	\begin{aligned} h_i(t) &\sim \text{GP}(\mathbf{0}, k_h(t, t')) \\
 	g_n(t) &\sim \text{GP}(h_i(t), k_g(t, t')) \text{ for } n\in c_i \\
-	f_{nr}(t) &\sim \text{GP}(g_n(t), k_f(t, t')). \end{aligned}  $$
+	f_{nr}(t) &\sim \text{GP}(g_n(t), k_f(t, t')), \end{aligned}  $$
+	
+for some covariance functions $k_h(t, t')$, $k_g(t, t')$, and $k_f(t, t')$. 
 
+Our data consist of a small subset of from a time-course DNA microarray experiment with *Drosophila melanogaster*.
+
+## The math
+
+Suppose we have $\mathbf{h}_i$, $\mathbf{g}_n$, and $\mathbf{f}_{nr}$, which are vectors of draws from draws from $h_i(t)$, $g_n(t)$, and $f_{nr}(t)$, respectively, at times $\mathbf{t}_{nr}$.
+
+## Implementation in R
 
 ```{r start, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(RColorBrewer)
-theme_set(theme_bw(base_size = 12)) # Slightly larger text for ggplot2
+theme_set(theme_bw(base_size = 14)) # Slightly larger text for ggplot2
 
 # Read in data, rearrange columns & rows, change levels order in gene factor
 drosophila <- read_csv("droslong.csv") %>%
